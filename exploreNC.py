@@ -1,3 +1,8 @@
+#a="b=f.variables['latitude'][:]"
+#exec(a)
+#b
+#ncdump -h dataset-ibi-reanalysis-bio-005-003-monthly-regulargrid_1510914389133.nc | sed -n  '/dimensions:/,/variables:/p
+
 from pylab import *
 import netCDF4
 from netCDF4 import Dataset
