@@ -25,18 +25,32 @@ lon=np.ma.MaskedArray(inputfile.variables['longitude'])
 
 if point_unique:
     #recup lat lon
-    latx=sys.argv[2]
-    lonx=sys.argv[3]
+    latx=float(sys.argv[2])
+    lonx=float(sys.argv[3])
     var=sys.argv[4]
+    
+    list=[]
+    for i in inputfile.variables['latitude']:
+        for j in inputfile.variables['longitude']:
+            list.append(i);list.append(j)
 
+
+    all_coord=np.reshape(list,(lat.size*lon.size,2))
     noval=True
+    
     while noval:
-     #Recup id de point le + proche
-     id_latx=(np.abs(lat-float(latx))).argmin() 
-     id_lonx=(np.abs(lon-float(lonx))).argmin()
+
+     tree=spatial.KDTree(all_coord)
+     closest_coord=(tree.query([(latx,lonx)]))
+     cc=closest_coord[1]
+    
+     a=float(all_coord[closest_coord[1]][0][0])
+     b=float(all_coord[closest_coord[1]][0][1])
+     id_latx=lat.tolist().index(a)
+     id_lonx=lon.tolist().index(b)
 
      #Print des coords les plus proches retenues
-     print ("Lat cherchee : "+str(latx)+" - Lat la plus proche disponible : "+str(lat[id_latx])+"\nLon cherchee : "+str(lonx)+" - Lon la plus proche disponible : "+str(lon[id_lonx]))
+     print ("Lat cherchee : "+str(latx)+" - Lat la plus proche disponible : "+str(lat[id_latx])+"\nLon cherchee : "+str(lonx)+" - Lon la plus proche disponible : "+str(lon[id_lonx])+"\n")
 
      #Recup toutes les donnees dispo #Temporalitee choisie ici
      phy=(inputfile.variables[var][:,0,id_latx,id_lonx])
@@ -56,23 +70,17 @@ if point_unique:
          plot(phy)
          plt.savefig('plot.png')
          noval=False
+
+         fout="%s_%s:%s"%(var,lat[id_latx],lon[id_lonx])
+         fo=open(fout,'w')
+         phy.tofile(fo,sep="\t",format="%s")
+         fo.close()
+
+
      else:
-         print ("Aucune donnee dispo aux coordonnees : "+str(lat[id_latx])+" "+str(lon[id_lonx])+".\nRecherche du deuxieme set de coord le plus proche")
-         lon2=np.delete(lon,id_lonx)
-         lat2=np.delete(lat,id_latx) 
-         
-         id_latx2=(np.abs(lat2-float(latx))).argmin()
-         id_lonx2=(np.abs(lon2-float(lonx))).argmin()
+         #print ("Aucune donnee dispo aux coordonnees : "+str(lat[id_latx])+" "+str(lon[id_lonx])+".\nRecherche du deuxieme set de coord le plus proche")
+         all_coord=np.delete(all_coord,cc,0)
 
-         print(str(abs(lon[id_lonx]-lon2[id_lonx2]))+","+str(abs(lat[id_latx]-lat2[id_latx2])))
-
-
-         if (abs(lon[id_lonx]-lon2[id_lonx2]) < abs(lat[id_latx]-lat2[id_latx2])):
-             print "1"
-             lon=np.delete(lon,id_lonx)
-         else:
-             lat=np.delete(lat,id_latx)
-             print "2"
 
 if zone_geo:
     #Coord
