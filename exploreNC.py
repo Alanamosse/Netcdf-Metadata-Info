@@ -22,7 +22,7 @@ inputfile=Dataset(sys.argv[1])
 #print sys.argv[1]
 
 #print variable
-print ("Details des variables dispo : "+str(inputfile.variables)+"\n")
+#print ("Details des variables dispo : "+str(inputfile.variables)+"\n")
 
 #Recup Lat et Lon
 lat=np.ma.MaskedArray(inputfile.variables['latitude'])
@@ -55,7 +55,7 @@ if point_unique:
      id_lonx=lon.tolist().index(b)
 
      #Print des coords les plus proches retenues
-     print ("Lat cherchee : "+str(latx)+" - Lat la plus proche disponible : "+str(lat[id_latx])+"\nLon cherchee : "+str(lonx)+" - Lon la plus proche disponible : "+str(lon[id_lonx])+"\n")
+     #print ("Lat cherchee : "+str(latx)+" - Lat la plus proche disponible : "+str(lat[id_latx])+"\nLon cherchee : "+str(lonx)+" - Lon la plus proche disponible : "+str(lon[id_lonx])+"\n")
 
      #Recup toutes les donnees dispo #Temporalitee choisie ici
      phy=(inputfile.variables[var][:,0,id_latx,id_lonx])
@@ -71,13 +71,15 @@ if point_unique:
 
      #Si vals dispo :
      if i<len(phy):
-         print ("Valeurs disponibles aux coordonnees : "+str(lat[id_latx])+" "+str(lon[id_lonx])+" : "+str(phy))
+         #print ("Valeurs disponibles aux coordonnees : "+str(lat[id_latx])+" "+str(lon[id_lonx])+" : "+str(phy))
          plot(phy)
          plt.savefig('plot.png')
          noval=False
-
-         fout="%s_%s:%s"%(var,lat[id_latx],lon[id_lonx])
+         print("impression de "+str(latx)+"_"+str(lonx))
+         
+         fout="%s_%s:%s"%(var,latx,lonx)
          fo=open(fout,'w')
+         fo.write(str(latx)+"_"+str(lonx)+"\t"+str(lat[id_latx])+"_"+str(lon[id_lonx])+"\t")
          phy.tofile(fo,sep="\t",format="%s")
          fo.close()
 
