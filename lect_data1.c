@@ -133,12 +133,13 @@ main()
        //if(dims!=NULL){free(dims);}
        //int *dims = (int *) malloc((var.ndims + 1) * sizeof(int));
        if(retval=(nc_inq_var(ncid, varid, var.name, &xtypep, 0,var.dims, &var.natts))){ERR(retval);}
-       fprintf(var_file,"\n%s %d %d",var.name,varid,var.ndims);       
+       fprintf(var_file,"%s %d",var.name,var.ndims);       
        if(var.ndims>0){printf(" ");}
        for(int id=0;id<var.ndims;id++){
            if(retval=(nc_inq_dim(ncid,var.dims[id],dim_name,&recs))){ERR(retval);}
            fprintf(var_file," %s %lu ",dim_name,recs);
        }
+       fprintf(var_file,"\n");
    }
 
 
