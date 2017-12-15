@@ -12,7 +12,7 @@ import sys
 import os
 from scipy import spatial
 from math import radians, cos, sin, asin, sqrt
-
+ 
 
 def haversine(lon1, lat1, lon2, lat2):
     """
@@ -31,7 +31,7 @@ def haversine(lon1, lat1, lon2, lat2):
     return c * r
 
 
-
+arg_n=len(sys.argv)-1
 
 #TODO
 #A mettre en option ici

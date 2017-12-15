@@ -1,3 +1,4 @@
+//gcc lect_data1.c -lnetcdf
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -88,11 +89,18 @@ main()
    printf("nombre de dimensions %d\nnombre de variables: %d \nnombre d'attribus globaux %d\ntruc zarb unlimited location : %d\n\n",ndims_in, nvars_in, ngatts_in, unlimdimid_in);
    //dims=(ncdim_t*)malloc((ndims_in+1)*sizeof(ncdim_t));
 
+   /* Open file */
+   FILE * dim_file;
+   dim_file=fopen("dim.tab","w");
+
+   if(dim_file==NULL){printf("Error!");exit(1);}
 
    /* Details sur les dimensions disponibles. */
    for (int i=0;i<ndims_in;i++){
       if(retval=nc_inq_dim(ncid,i,recname,&recs)){ERR(retval);}
-      printf("ndim:%d : %s\n",i,recname);}
+      fprintf(dim_file,"ndim:%d : %s\n",i,recname);}
+
+   fclose(dim_file);
    
 /*
    int time_id;
@@ -112,23 +120,26 @@ main()
       printf("\nid:%d name:%s ndim:%d ",varid,name,ndimsp);
       }*/
 
+
+   /* Open file */
+   FILE * var_file;
+   var_file=fopen("var.tab","w");
+
+   if(var_file==NULL){printf("Error!");exit(1);}
+
+   /* Print var informations */
    for(varid=0;varid<nvars_in;varid++){
        if(retval=(nc_inq_varndims(ncid,varid,&var.ndims))){ERR(retval);}
        //if(dims!=NULL){free(dims);}
        //int *dims = (int *) malloc((var.ndims + 1) * sizeof(int));
        if(retval=(nc_inq_var(ncid, varid, var.name, &xtypep, 0,var.dims, &var.natts))){ERR(retval);}
-       printf("\n%s %d %d",var.name,varid,var.ndims);       
+       fprintf(var_file,"\n%s %d %d",var.name,varid,var.ndims);       
        if(var.ndims>0){printf(" ");}
        for(int id=0;id<var.ndims;id++){
            if(retval=(nc_inq_dim(ncid,var.dims[id],dim_name,&recs))){ERR(retval);}
-           printf("%s %lu ",dim_name,recs);
-
+           fprintf(var_file," %s %lu ",dim_name,recs);
        }
-
-
    }
-
-
 
 
    /*for(int j=0;j<ndimsp;j++){
