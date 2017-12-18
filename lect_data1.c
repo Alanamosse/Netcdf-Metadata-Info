@@ -98,7 +98,7 @@ main()
    /* Details sur les dimensions disponibles. */
    for (int i=0;i<ndims_in;i++){
       if(retval=nc_inq_dim(ncid,i,recname,&recs)){ERR(retval);}
-      fprintf(dim_file,"ndim:%d : %s\n",i,recname);}
+      fprintf(dim_file,"ndim:%d\t%s\n",i,recname);}
 
    fclose(dim_file);
    
@@ -133,11 +133,12 @@ main()
        //if(dims!=NULL){free(dims);}
        //int *dims = (int *) malloc((var.ndims + 1) * sizeof(int));
        if(retval=(nc_inq_var(ncid, varid, var.name, &xtypep, 0,var.dims, &var.natts))){ERR(retval);}
-       fprintf(var_file,"%s %d",var.name,var.ndims);       
-       if(var.ndims>0){printf(" ");}
-       for(int id=0;id<var.ndims;id++){
+       fprintf(var_file,"%s\t%d",var.name,var.ndims);       
+       if(var.ndims>0){printf("\t");}
+       for(int id=0;id<ndims_in;id++){
            if(retval=(nc_inq_dim(ncid,var.dims[id],dim_name,&recs))){ERR(retval);}
-           fprintf(var_file," %s %lu ",dim_name,recs);
+           if(id<var.ndims){fprintf(var_file,"\t%s\t%lu",dim_name,recs);}
+           else{fprintf(var_file,"\tNA\tNA");}
        }
        fprintf(var_file,"\n");
    }
