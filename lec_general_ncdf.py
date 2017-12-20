@@ -78,128 +78,188 @@ def is_equal(filename, dim_name, value):
     return index
 
 
-arg_n=len(sys.argv)-1
-
-#A mettre en option ici
-point_unique=True
-zone_geo=False
-
 #recup fichier nc
 inputfile=Dataset(sys.argv[1])
 
-#recup le fichier dim.tab
-var_file=open(sys.argv[2],"r")
-lines=var_file.readlines()
+Coord_bool=False
+
+#Check if coord is passed as parameter
+arg_n=len(sys.argv)-1
+if(((arg_n-3)%3)!=0):
+    print "il y a des coord a prendre en compte. Reduction de arg_n de 4."
+    Coord_bool=True #Utile pour recup les coord les plus proche plus loins
+    arg_n=arg_n-4
+    name_dim_lat=str(sys.argv[-4])
+    name_dim_lon=str(sys.argv[-2])
+    value_dim_lat=float(sys.argv[-3])
+    value_dim_lon=float(sys.argv[-1])
+
+#Recup coord user
+    try:
+        lat=np.ma.MaskedArray(inputfile.variables[name_dim_lat])
+        lon=np.ma.MaskedArray(inputfile.variables[name_dim_lon])
+    except:
+        sys.exit("Latitude & Longitude not found") 
+
+#Recup all coord set available
+    list_coord_dispo=[]
+    for i in lat:
+        for j in lon:
+            list_coord_dispo.append(i);list_coord_dispo.append(j)
+
+
+    all_coord=np.reshape(list_coord_dispo,(lat.size*lon.size,2))
+    noval=True
+
+
+#recup le fichier var.tab
+var_file=open(sys.argv[2],"r") #read
+lines=var_file.readlines() #line
 dim_names=[]
 for line in lines:
     words=line.split()
-    if (words[0]==sys.argv[3]):
-        #print line
-        varndim=words[1] #TODO ici faire une boucle for i<varndim{recup dim_i}
-        for dim in xrange(2,len(words),2):
-            #print words[dim]
+    if (words[0]==sys.argv[3]): #Quand ligne correspondante a la var passee en entree
+        varndim=int(words[1])  #Nombre de dim pour la var
+        for dim in xrange(2,varndim*2+2,2): #Recup des dim names
             dim_names.append(words[dim])
+            if Coord_bool:
+                if words[dim]==name_dim_lat: #Recup index de lat et lon dans la liste des dim 
+                    dim_lat_index=dim/2
+                    #print dim_lat_index
+                if words[dim]==name_dim_lon:
+                    dim_lon_index=dim/2
+                    #print dim_lon_index
         print ("Variable choisie : "+sys.argv[3]+". Nombre de dimensions : "+str(varndim)+". Dimensions : "+str(dim_names))
         
 
 
-
-#Recup Lat et Lon
-lat=np.ma.MaskedArray(inputfile.variables['latitude']) #TODO#a faire en try ou faire un if nom=latitude or nom=lat.
-lon=np.ma.MaskedArray(inputfile.variables['longitude'])
+#A mettre en option ici
+point_unique=True
+zone_geo=False
 
 if point_unique:
     var=sys.argv[3]
     #ndim=(arg_n-3)/3 
     #print ("nombre de dim :"+str(ndim))
     my_dic={} #lol #d["string{0}".format(x)]
-    execu="vec=inputfile.variables['"+str(sys.argv[3])+"']["
+    #execu="vec=inputfile.variables['"+str(sys.argv[3])+"']["
     for i in xrange(4,arg_n,3):
-        #print("Nom de la dim : "+sys.argv[i]+" action sur la dim : "+sys.argv[i+1]+" .Valeur de la dim choisie : "+sys.argv[i+2])
+        print("\nNom de la dim : "+sys.argv[i]+" action sur la dim : "+sys.argv[i+1]+" .Valeur de la dim choisie : "+sys.argv[i+2]+"\n")
         my_dic["string{0}".format(i)]="list_index_dim"
-        my_dic_index="list_index_dim"+str(i/3)
-        if i!=4:
-            execu=execu+","
+        my_dic_index="list_index_dim"+str(sys.argv[i])   #TODO Verif si il y a lon et lat
         if (sys.argv[i+1]=="<"):
             my_dic[my_dic_index]=is_strict_inf(inputfile, sys.argv[i], int(sys.argv[i+2]))
-            execu=execu+"my_dic[\""+str(my_dic_index)+"\"]"
-            #print inputfile.variables[sys.argv[i]][my_dic[my_dic_index]]
-            #print my_dic["list_index_dim1"]
         if (sys.argv[i+1]=="<="):
             my_dic[my_dic_index]=is_equal_inf(inputfile, sys.argv[i], float(sys.argv[i+2]))
-            execu=execu+"my_dic[\""+str(my_dic_index)+"\"]"
         if (sys.argv[i+1]==">"):
             my_dic[my_dic_index]=is_strict_sup(inputfile, sys.argv[i], float(sys.argv[i+2]))
-            execu=execu+"my_dic[\""+str(my_dic_index)+"\"]"
         if (sys.argv[i+1]==">="):
             my_dic[my_dic_index]=is_equal_sup(inputfile, sys.argv[i], float(sys.argv[i+2]))
-            execu=execu+"my_dic[\""+str(my_dic_index)+"\"]"
         if (sys.argv[i+1]=="="):
             my_dic[my_dic_index]=is_equal(inputfile, sys.argv[i], float(sys.argv[i+2]))
-            execu=execu+"my_dic[\""+str(my_dic_index)+"\"]"
         if (sys.argv[i+1]==":"):
-            execu=execu+":"
-    execu=execu+"]"
-    #print execu
-    exec(execu)
-    print vec
+            my_dic[my_dic_index]=np.arange(inputfile.variables[sys.argv[i]].size)
+
+
+    #Si on a des coord a retrouver
+    if Coord_bool: 
+     while noval:
+        #Recherche coord dispo la plus proche
+        tree=spatial.KDTree(all_coord)
+        closest_coord=(tree.query([(value_dim_lat,value_dim_lon)]))
+        cc_index=closest_coord[1]
+
+        a=float(all_coord[closest_coord[1]][0][0])
+        b=float(all_coord[closest_coord[1]][0][1])
+
+        #Recup des index dans dic
+        my_dic_index="list_index_dim"+str(name_dim_lat)
+        my_dic[my_dic_index]=lat.tolist().index(a)
+
+        my_dic_index="list_index_dim"+str(name_dim_lon)
+        my_dic[my_dic_index]=lon.tolist().index(b)
+
+
+        #Execution du string avec les dic pour recup des valeurs apres filtres
+        exec2="vec2=inputfile.variables['"+str(sys.argv[3])+"']["
+        first=True
+        for i in dim_names: #Respect de l'ordre des dimensions
+            if not first:
+                exec2=exec2+","
+            dimension_indexes="my_dic[\"list_index_dim"+i+"\"]"
+            try:  #Si ca fonctionne pas on met tout ? c'est yolo mais evite erreur
+                exec(dimension_indexes)
+            except:
+                dimension_indexes=":"
+            exec2=exec2+dimension_indexes
+            first=False
+        exec2=exec2+"]"
+        #print exec2 #Execution et recup dans vec2
+        exec(exec2)
+        #print vec2
+
+
+        #Check qu'il y au moins une donnee int de dispo
+        i=0 
+        #print vec2.size
+        #print vec2
+        if vec2.size>1:
+            while True and i<len(vec2):
+                if isinstance(vec2[i],(np.float32)):
+                    break
+                i=i+1
+        else:
+            if isinstance(vec2,(np.float32)):
+                i=vec2.size+1 
+                noval=False
+                #print vec2
+                break
+        #print a
+        #print b
+        if i<len(vec2):
+            #print lat.tolist().index(a)
+            #print lon.tolist().index(b)
+            noval=False
+            #print vec2
+        else:
+            all_coord=np.delete(all_coord,cc_index,0)
+
+
+#TODO check if i<len(vec2). si oui pop la coord de all_coord. Faire une fonction pour remplir my_dic_lat et _lon pour recup plus vite et plus proprement. faire un while dans un if Coord_bool pour trouver coord avec values
+    else:
+        #Execution du string avec les dic pour recup des valeurs apres filtres
+        exec2="vec2=inputfile.variables['"+str(sys.argv[3])+"']["
+        first=True
+        for i in dim_names: #Respect de l'ordre des dimensions
+            if not first:
+                exec2=exec2+","
+            dimension_indexes="my_dic[\"list_index_dim"+i+"\"]"
+            try:  #Si ca fonctionne pas on met tout ? c'est yolo mais evite erreur
+                exec(dimension_indexes)
+            except:
+                dimension_indexes=":"
+            exec2=exec2+dimension_indexes
+            first=False
+        exec2=exec2+"]"
+        print exec2 #Execution et recup dans vec2
+        exec(exec2)
+        #print vec2
+   
+
+    print vec2
+
+    fo=open("/home/linux-65mo/Bureau/sortie.tab",'w')
+    try:
+        vec2.tofile(fo,sep="\t",format="%s")
+    except:
+        vec3=np.ma.filled(vec2,np.nan)
+        vec3.tofile(fo,sep="\t",format="%s")
+    fo.close()
 
 
 
 
-    #Recup Lat et Lon
-    lat=np.ma.MaskedArray(inputfile.variables['latitude'])
-    lon=np.ma.MaskedArray(inputfile.variables['longitude'])
-    all_coord=np.reshape(list,(lat.size*lon.size,2))
-
-
-    noval=True
-    
-    while noval:
-
-     tree=spatial.KDTree(all_coord)
-     closest_coord=(tree.query([(latx,lonx)]))
-     cc=closest_coord[1]
-    
-     a=float(all_coord[closest_coord[1]][0][0])
-     b=float(all_coord[closest_coord[1]][0][1])
-     id_latx=lat.tolist().index(a)
-     id_lonx=lon.tolist().index(b)
-
-     #Print des coords les plus proches retenues
-     #print ("Lat cherchee : "+str(latx)+" - Lat la plus proche disponible : "+str(lat[id_latx])+"\nLon cherchee : "+str(lonx)+" - Lon la plus proche disponible : "+str(lon[id_lonx])+"\n")
-
-     #Recup toutes les donnees dispo #Temporalitee choisie ici
-     phy=(inputfile.variables[var][:,0,id_latx,id_lonx])
-
-
-     #Check qu'il y au moins une donnee int de dispo
-     i=0
-     while True and i<len(phy):
-         if isinstance(phy[i],(np.float32)):
-             break
-         i=i+1
-
-     #Si vals dispo :
-     if i<len(phy):
-         #print ("Valeurs disponibles aux coordonnees : "+str(lat[id_latx])+" "+str(lon[id_lonx])+" : "+str(phy))
-         plot(phy)
-         plt.savefig('plot.png')
-         noval=False
-         print("impression de "+str(latx)+"_"+str(lonx))
-         
-         fout="%s_%s:%s"%(var,latx,lonx)
-         fo=open(fout,'w')
-         fo.write(str(latx)+"_"+str(lonx)+"\t"+str(lat[id_latx])+"_"+str(lon[id_lonx])+"\t"+str(haversine(lonx,latx,lon[id_lonx],lat[id_latx]))+"\t")
-         phy.tofile(fo,sep="\t",format="%s")
-         fo.close()
-
-
-     else:
-         #print ("Aucune donnee dispo aux coordonnees : "+str(lat[id_latx])+" "+str(lon[id_lonx])+".\nRecherche du deuxieme set de coord le plus proche")
-         all_coord=np.delete(all_coord,cc,0)
-
-
+################################################################"""""" 
 if zone_geo:
     #Coord
     lat_min=float(sys.argv[2])
