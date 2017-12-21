@@ -54,7 +54,8 @@ typedef struct {
 
 
 /* This is the name of the data file we will read. */
-#define FILE_NAME "dataset-ibi-reanalysis-bio-005-003-monthly-regulargrid_1510914389133.nc"
+//#define FILE_NAME "dataset-ibi-reanalysis-bio-005-003-monthly-regulargrid_1510914389133.nc"
+
 /* Handle errors by printing an error message and exiting with a non-zero status. */
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); return 2;}
 
@@ -66,8 +67,9 @@ if (status!=NC_NOERR){
 
 
 int
-main()
+main(int argc, char *argv[])
 {
+   #define FILE_NAME argv[1]
    int ncid;
    
    /* We will learn about the data file and store results in these
@@ -90,12 +92,12 @@ main()
    
    /* Details sur fichier. */
    if (retval = nc_inq(ncid, &ndims_in, &nvars_in, &ngatts_in,&unlimdimid_in)){ERR(retval);}
-   printf("nombre de dimensions %d\nnombre de variables: %d \nnombre d'attribus globaux %d\ntruc zarb unlimited location : %d\n\n",ndims_in, nvars_in, ngatts_in, unlimdimid_in);
+   //printf("nombre de dimensions %d\nnombre de variables: %d \nnombre d'attribus globaux %d\ntruc zarb unlimited location : %d\n\n",ndims_in, nvars_in, ngatts_in, unlimdimid_in);
    //dims=(ncdim_t*)malloc((ndims_in+1)*sizeof(ncdim_t));
 
    /* Open file */
    FILE * dim_file;
-   dim_file=fopen("dim.tab","w");
+   dim_file=fopen("dim2.tab","w");
 
    if(dim_file==NULL){printf("Error!");exit(1);}
 
@@ -127,7 +129,7 @@ main()
 
    /* Open file */
    FILE * var_file;
-   var_file=fopen("var.tab","w");
+   var_file=fopen("var2.tab","w");
 
    if(var_file==NULL){printf("Error!");exit(1);}
 
@@ -138,7 +140,7 @@ main()
        //int *dims = (int *) malloc((var.ndims + 1) * sizeof(int));
        if(retval=(nc_inq_var(ncid, varid, var.name, &xtypep, 0,var.dims, &var.natts))){ERR(retval);}
        fprintf(var_file,"%s\t%d",var.name,var.ndims);       
-       if(var.ndims>0){printf("\t");}
+//       if(var.ndims>0){printf("\t");} //KESAKWA ?
        for(int id=0;id<ndims_in;id++){
            if(retval=(nc_inq_dim(ncid,var.dims[id],dim_name,&recs))){ERR(retval);}
            if(id<var.ndims){fprintf(var_file,"\t%s\t%lu",dim_name,recs);}
@@ -161,6 +163,6 @@ main()
       printf("\n%d",val);*/
 
 
-   printf("\n\n*** SUCCESS reading example file sfc_pres_temp.nc!\n");
+   //printf("\n\n*** SUCCESS reading example file sfc_pres_temp.nc!\n");
    return 0;
 }

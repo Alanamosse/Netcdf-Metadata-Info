@@ -216,7 +216,7 @@ if point_unique:
                 break
         #print a
         #print b
-        if i<len(vec2):
+        if i<vec2.size:
             #print lat.tolist().index(a)
             #print lon.tolist().index(b)
             noval=False
@@ -247,6 +247,7 @@ if point_unique:
    
 
     print vec2
+    print vec2.shape
 
     fo=open("/home/linux-65mo/Bureau/sortie.tab",'w')
     try:
