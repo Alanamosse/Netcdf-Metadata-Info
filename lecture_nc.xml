@@ -1,0 +1,75 @@
+<tool id="lec_nc" name="Netcdf Read" version="0.1.0">
+    <requirements>
+        <requirement type="package" version="2.1.0">matplotlib</requirement>
+        <requirement type="package" version="1.3.1">netCDF4</requirement>
+        <requirement type="package" version="1.0.0">scipy</requirement>
+    </requirements>
+    <command detect_errors="exit_code"><![CDATA[
+        python /media/linux-65mo/Linux/65MO/lecture_netcdf/lec_general_ncdf.py $input
+        $var $var.fields.n_dim $var_tab
+        #for $i,$uc in enumerate($user_choice)
+            ${uc.dim} ${uc.comparator} ${uc.value}
+        #end for 
+        #if $condi_coord.coord=='yes_cust_coord'
+            $condi_coord.lat_dim $condi_coord.lat_val $condi_coord.lon_dim $condi_coord.lon_val
+        #end if
+        $output
+    ]]></command>
+    <inputs>
+        <param type="data" name="input" label="netcdf file" format="netcdf"/>
+        <param type="data" label="Tabular of variables" name="var_tab" format="tabular"/>
+
+        <param name="var" type="select" label="Chose your variable">
+            <options from_dataset="var_tab">
+                <column name="name" index="0"/>
+                <column name="value" index="0"/>
+                <column name="n_dim" index="1"/>
+            </options>
+        </param>
+        <param type="data" label="Tabular of dimensions" name="dim_tab" format="tabular"/>
+        
+        <conditional name="condi_coord">
+            <param name="coord" type="boolean" label="Search custom coordinates" truevalue="yes_cust_coord" checked="true" falsevalue="nope" help="The tool will search available values for the closest coordinates."/>
+            <when value="yes_cust_coord">
+                <param name="lat_dim" type="select" label="Select latitude" >
+                    <options from_dataset="dim_tab">
+                        <column name="value" index="0"/>
+                    </options>
+                </param>
+                <param name="lat_val" type="float" value="0" label="Latitude"/>
+                <param name="lon_dim" type="select" label="Select longitude" >
+                    <options from_dataset="dim_tab">
+                        <column name="value" index="0"/>
+                    </options>
+                </param>
+                <param name="lon_val" type="float" value="0" label="Longitude"/>
+            </when>
+            <when value="nope"></when>
+        </conditional>
+        <repeat name="user_choice" title="Filter">
+            <param name="dim" type="select" label="Filter by dimensions" help="The dimension must be part of the variable">
+                <options from_dataset="dim_tab">
+                    <column name="value" index="0"/>
+                </options>
+            </param>
+            <param name="comparator" type="select" label="Comparator">
+                <option value="e">Equal</option>
+                <option value="g">Greater</option>
+                <option value="ge">Greater or equal</option>
+                <option value="l">Less</option>
+                <option value="le">Less or equal</option>
+                <!-- <option value="a">All</option> -->
+            </param>
+            <param name="value" type="float" value="0" label="Value"/>
+        </repeat>
+
+
+
+    </inputs>        
+    <outputs>
+        <data name="output" format="tabular" label="label" from_work_directory="sortie.tabular"/>
+    </outputs>
+    <help><![CDATA[
+Ceci est completement experimental. #lol        
+    ]]></help>
+</tool>
