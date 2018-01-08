@@ -120,7 +120,7 @@ for line in lines:
     words=line.split()
     if (words[0]==sys.argv[3]): #Quand ligne correspondante a la var passee en entree
         varndim=int(words[1])  #Nombre de dim pour la var
-        for dim in xrange(2,varndim*2+2,2): #Recup des dim names
+        for dim in range(2,varndim*2+2,2): #Recup des dim names
             dim_names.append(words[dim])
             if Coord_bool:
                 if words[dim]==name_dim_lat: #Recup index de lat et lon dans la liste des dim 
@@ -143,12 +143,12 @@ if point_unique:
     #print ("nombre de dim :"+str(ndim))
     my_dic={} #lol #d["string{0}".format(x)]
     #execu="vec=inputfile.variables['"+str(sys.argv[3])+"']["
-    for i in xrange(4,arg_n,3):
+    for i in range(4,arg_n,3):
         #print("\nNom de la dim : "+sys.argv[i]+" action sur la dim : "+sys.argv[i+1]+" .Valeur de la dim choisie : "+sys.argv[i+2]+"\n")
         my_dic["string{0}".format(i)]="list_index_dim"
         my_dic_index="list_index_dim"+str(sys.argv[i])   #TODO Verif si il y a lon et lat
         if (sys.argv[i+1]=="l"):
-            my_dic[my_dic_index]=is_strict_inf(inputfile, sys.argv[i], int(sys.argv[i+2]))
+            my_dic[my_dic_index]=is_strict_inf(inputfile, sys.argv[i], float(sys.argv[i+2]))
         if (sys.argv[i+1]=="le"):
             my_dic[my_dic_index]=is_equal_inf(inputfile, sys.argv[i], float(sys.argv[i+2]))
         if (sys.argv[i+1]=="g"):
@@ -247,13 +247,13 @@ if point_unique:
 
     for i in dim_names:
         size_dim=inputfile[i][my_dic['list_index_dim'+i]].size
-        print i,size_dim
+        #print (i,size_dim)
         #if size_dim>1:
          #   for s in range(0,size_dim):
           #      print i,inputfile[i][my_dic['list_index_dim'+i][s]]
         #print i,inputfile[i][my_dic['list_index_dim'+i]]
     #print exec2
-    print vec2
+    #print (vec2)
     #print vec2.shape
 
     fo=open("sortie.tabular",'w')

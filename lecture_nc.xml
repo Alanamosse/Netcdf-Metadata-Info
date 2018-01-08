@@ -6,14 +6,13 @@
     </requirements>
     <command detect_errors="exit_code"><![CDATA[
         python /media/linux-65mo/Linux/65MO/lecture_netcdf/lec_general_ncdf.py $input
-        $var $var.fields.n_dim $var_tab
+        $var_tab $var
         #for $i,$uc in enumerate($user_choice)
             ${uc.dim} ${uc.comparator} ${uc.value}
         #end for 
         #if $condi_coord.coord=='yes_cust_coord'
             $condi_coord.lat_dim $condi_coord.lat_val $condi_coord.lon_dim $condi_coord.lon_val
         #end if
-        $output
     ]]></command>
     <inputs>
         <param type="data" name="input" label="netcdf file" format="netcdf"/>
@@ -67,7 +66,7 @@
 
     </inputs>        
     <outputs>
-        <data name="output" format="tabular" label="label" from_work_directory="sortie.tabular"/>
+        <data name="output" format="tabular" label="Values from ${input.name}" from_work_dir="sortie.tabular"/>
     </outputs>
     <help><![CDATA[
 Ceci est completement experimental. #lol        
