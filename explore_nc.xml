@@ -1,0 +1,17 @@
+<tool id="extract_nc_info" name="Netcdf Info" version="0.1.0">
+    <requirements>
+    </requirements>
+    <command detect_errors="exit_code"><![CDATA[
+        /media/linux-65mo/Linux/65MO/lecture_netcdf/aout $input
+        &&
+        bash /media/linux-65mo/Linux/65MO/lecture_netcdf/div_vartab.sh $var_tabs
+    ]]></command>
+    <inputs>
+        <param type="data" name="input" label="netcdf file" format="netcdf"/>
+    </inputs>
+    <outputs>
+        <data name="var_tabs">
+            <discover_datasets pattern="__designation_and_ext__" visible="true"/>
+        </data>
+    </outputs>
+</tool>
