@@ -86,7 +86,7 @@ Coord_bool=False
 #Check if coord is passed as parameter
 arg_n=len(sys.argv)-1
 if(((arg_n-3)%3)!=0):
-    print "il y a des coord a prendre en compte. Reduction de arg_n de 4."
+    #print "il y a des coord a prendre en compte. Reduction de arg_n de 4."
     Coord_bool=True #Utile pour recup les coord les plus proche plus loins
     arg_n=arg_n-4
     name_dim_lat=str(sys.argv[-4])
@@ -129,7 +129,7 @@ for line in lines:
                 if words[dim]==name_dim_lon:
                     dim_lon_index=dim/2
                     #print dim_lon_index
-        print ("Variable choisie : "+sys.argv[3]+". Nombre de dimensions : "+str(varndim)+". Dimensions : "+str(dim_names))
+        #print ("Variable choisie : "+sys.argv[3]+". Nombre de dimensions : "+str(varndim)+". Dimensions : "+str(dim_names))
         
 
 
@@ -144,18 +144,18 @@ if point_unique:
     my_dic={} #lol #d["string{0}".format(x)]
     #execu="vec=inputfile.variables['"+str(sys.argv[3])+"']["
     for i in xrange(4,arg_n,3):
-        print("\nNom de la dim : "+sys.argv[i]+" action sur la dim : "+sys.argv[i+1]+" .Valeur de la dim choisie : "+sys.argv[i+2]+"\n")
+        #print("\nNom de la dim : "+sys.argv[i]+" action sur la dim : "+sys.argv[i+1]+" .Valeur de la dim choisie : "+sys.argv[i+2]+"\n")
         my_dic["string{0}".format(i)]="list_index_dim"
         my_dic_index="list_index_dim"+str(sys.argv[i])   #TODO Verif si il y a lon et lat
-        if (sys.argv[i+1]=="<"):
+        if (sys.argv[i+1]=="l"):
             my_dic[my_dic_index]=is_strict_inf(inputfile, sys.argv[i], int(sys.argv[i+2]))
-        if (sys.argv[i+1]=="<="):
+        if (sys.argv[i+1]=="le"):
             my_dic[my_dic_index]=is_equal_inf(inputfile, sys.argv[i], float(sys.argv[i+2]))
-        if (sys.argv[i+1]==">"):
+        if (sys.argv[i+1]=="g"):
             my_dic[my_dic_index]=is_strict_sup(inputfile, sys.argv[i], float(sys.argv[i+2]))
-        if (sys.argv[i+1]==">="):
+        if (sys.argv[i+1]=="ge"):
             my_dic[my_dic_index]=is_equal_sup(inputfile, sys.argv[i], float(sys.argv[i+2]))
-        if (sys.argv[i+1]=="="):
+        if (sys.argv[i+1]=="e"):
             my_dic[my_dic_index]=is_equal(inputfile, sys.argv[i], float(sys.argv[i+2]))
         if (sys.argv[i+1]==":"):
             my_dic[my_dic_index]=np.arange(inputfile.variables[sys.argv[i]].size)
@@ -241,15 +241,22 @@ if point_unique:
             exec2=exec2+dimension_indexes
             first=False
         exec2=exec2+"]"
-        print exec2 #Execution et recup dans vec2
+        #print exec2 #Execution et recup dans vec2
         exec(exec2)
-        #print vec2
    
 
+    for i in dim_names:
+        size_dim=inputfile[i][my_dic['list_index_dim'+i]].size
+        print i,size_dim
+        #if size_dim>1:
+         #   for s in range(0,size_dim):
+          #      print i,inputfile[i][my_dic['list_index_dim'+i][s]]
+        #print i,inputfile[i][my_dic['list_index_dim'+i]]
+    #print exec2
     print vec2
-    print vec2.shape
+    #print vec2.shape
 
-    fo=open("/home/linux-65mo/Bureau/sortie.tab",'w')
+    fo=open("sortie.tabular",'w')
     try:
         vec2.tofile(fo,sep="\t",format="%s")
     except:
