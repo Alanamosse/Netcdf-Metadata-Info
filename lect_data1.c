@@ -95,18 +95,20 @@ main(int argc, char *argv[])
    //printf("nombre de dimensions %d\nnombre de variables: %d \nnombre d'attribus globaux %d\ntruc zarb unlimited location : %d\n\n",ndims_in, nvars_in, ngatts_in, unlimdimid_in);
    //dims=(ncdim_t*)malloc((ndims_in+1)*sizeof(ncdim_t));
 
-   /* Open file */
+/*
+   // Open file
    FILE * dim_file;
-   dim_file=fopen("dim2.tab","w");
+   dim_file=fopen("dim2.tabular","w");
 
    if(dim_file==NULL){printf("Error!");exit(1);}
 
-   /* Details sur les dimensions disponibles. */
+   // Details sur les dimensions disponibles.
    for (int i=0;i<ndims_in;i++){
       if(retval=nc_inq_dim(ncid,i,recname,&recs)){ERR(retval);}
       fprintf(dim_file,"ndim:%d\t%s\n",i,recname);}
 
    fclose(dim_file);
+*/
    
 /*
    int time_id;
@@ -129,7 +131,7 @@ main(int argc, char *argv[])
 
    /* Open file */
    FILE * var_file;
-   var_file=fopen("var2.tab","w");
+   var_file=fopen("var2.tabular","w");
 
    if(var_file==NULL){printf("Error!");exit(1);}
 
