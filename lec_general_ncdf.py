@@ -244,17 +244,44 @@ if point_unique:
         #print exec2 #Execution et recup dans vec2
         exec(exec2)
    
-
+#can be skiped AND MUST BE
+    a=[]
     for i in dim_names:
         size_dim=inputfile[i][my_dic['list_index_dim'+i]].size
-        #print (i,size_dim)
-        #if size_dim>1:
-         #   for s in range(0,size_dim):
-          #      print i,inputfile[i][my_dic['list_index_dim'+i][s]]
-        #print i,inputfile[i][my_dic['list_index_dim'+i]]
+        print (i,size_dim)
+        b=[]
+        if size_dim>1:
+            for s in range(0,size_dim):
+                b.append(inputfile[i][my_dic['list_index_dim'+i][s]])
+                #print (i,inputfile[i][my_dic['list_index_dim'+i][s]])
+        else:
+            b.append(inputfile[i][my_dic['list_index_dim'+i]])
+            #print (i,inputfile[i][my_dic['list_index_dim'+i]])
+        a.append(b)
+    print (a)
+    import itertools
+    for combination in itertools.product(*a):
+        print (combination)
+
     #print exec2
     #print (vec2)
     #print vec2.shape
+
+#test itertools combination
+#    import itertools
+ #   a=[]
+  #  for i in dim_names:
+   #     b=[]
+    #    to_exe="b.append((inputfile['"+i+"'][my_dic['list_index_dim"+i+"']]))"
+     #   exec(to_exe)
+#
+ #       print (to_exe,b)
+  #      a.append(b)   
+   # print (a)
+    #print ("\n")   
+    #for combination in itertools.product(*a):
+    #    print (combination)
+
 
     fo=open("sortie.tabular",'w')
     try:
