@@ -8,6 +8,9 @@ import os
 from scipy import spatial
 from math import radians, cos, sin, asin, sqrt
 import itertools
+
+#####################
+#####################
  
 def checklist(dim_list, dim_name, filtre, threshold):
     if not dim_list:
@@ -78,17 +81,21 @@ def is_equal(filename, dim_name, value):
         index=find_nearest(filename.variables[dim_name][:],value)
     return index
 
+#######################
+#######################
+
 #Get args
 #Get Input file
 inputfile=Dataset(sys.argv[1])
 var_file_tab=sys.argv[2]
 var=sys.argv[3] #User chosen by user
 
-
-
-
-
 Coord_bool=False
+
+
+######################
+######################
+
 
 #Check if coord is passed as parameter
 arg_n=len(sys.argv)-1
@@ -118,6 +125,10 @@ if(((arg_n-3)%3)!=0):
     noval=True
 
 
+#########################
+#########################
+
+
 #Get the file of variables and number of dims : var.tab
 var_file=open(var_file_tab,"r") #read
 lines=var_file.readlines() #line
@@ -130,6 +141,10 @@ for line in lines: #for every lines
             dim_names.append(words[dim])
         #print ("Chosen var : "+sys.argv[3]+". Number of dimensions : "+str(varndim)+". Dimensions : "+str(dim_names)) #Standard msg
         
+
+########################
+########################
+
 
 #Use a dictionary to save every lists of indexes
 my_dic={} ##d["string{0}".format(x)]
@@ -152,6 +167,10 @@ for i in range(4,arg_n,3):
         my_dic[my_dic_index]=is_equal(inputfile, sys.argv[i], float(sys.argv[i+2]))
     if (sys.argv[i+1]==":"): #all
         my_dic[my_dic_index]=np.arange(inputfile.variables[sys.argv[i]].size)
+
+
+#####################
+#####################
 
 
 #If precise coord given.
@@ -180,7 +199,7 @@ if Coord_bool:
             if not first:
                 exec2=exec2+","
             dimension_indexes="my_dic[\"list_index_dim"+i+"\"]" #new dim, custom name dic
-            try:  #If some error appear every indexes are used for the selected dim #TODO Give some error message
+            try:  #If some error or no specific user choices; every indexes are used for the selected dim.
                 exec(dimension_indexes)
             except:
                 dimension_indexes=":"
@@ -191,28 +210,19 @@ if Coord_bool:
         exec(exec2) #Execution, value are in vec2.
         #print vec2 #Get the value, standard output
 
-
         #Check integrity of vec2. We don't want  NA values
         i=0 
-        #Check every value, if at least one non NA is found vec2 and the current closest coords are validated #TODO ça sert à rien de dif >1 et =1 NANA?
-        if vec2.size>1: #If vec size is greater than 1
-            while True and i<len(vec2): 
-                if vec2[i]!="nan": 
-                    break
-                else: 
-                    i=i+1
-        else: #If vec2 len is 1
-            if vec2[i]!="nan":
+        #Check every value, if at least one non NA is found vec2 and the current closest coords are validated
+        while i<len(vec2): 
+            if vec2[i]!="nan": 
                 break
-            else:
+            else: 
                 i=i+1
         if i<vec2.size: #There is at least 1 nonNA value
             noval=False
         else: #If only NA, pop the closest coord and search in the second closest coord in the next loop.
             all_coord=np.delete(all_coord,cc_index,0)
 
-
-#TODO check if i<len(vec2). si oui pop la coord de all_coord. Faire une fonction pour remplir my_dic_lat et _lon pour recup plus vite et plus proprement. faire un while dans un if Coord_bool pour trouver coord avec values
 
 #Same as before, dictionary use in exec2. exec(exec2) give vec2 and the values wanted.
 else:
@@ -232,17 +242,14 @@ else:
     exec(exec2)
    
 
-
-
-
+########################
+########################
 
 
 #This part create the header of every value. 
 #Values of every dim from the var is saved in a list : b[].
 #All the lists b are saved in the unique list a[]
 #All the combinations of the dim values inside a[] are the headers of the vec2 values 
-
-#can be skiped AND MUST BE
 a=[]
 for i in dim_names:
     try: #If it doesn't work here its because my_dic= : so there is no size. Except will direcly take size of the dim.
@@ -252,7 +259,8 @@ for i in dim_names:
         my_dic['list_index_dim'+i]=range(size_dim)
 
     #print (i,size_dim) #Standard msg
-    b=[]  #TODO ICI non plus pas besoin de dif selon la taille nan ?
+    b=[]
+    #Check size is useful since b.append(inputfile[i][my_dic['list_index_dim'+i][0]])  won't work
     if size_dim>1:
         for s in range(0,size_dim):
             b.append(inputfile[i][my_dic['list_index_dim'+i][s]])
@@ -263,6 +271,9 @@ for i in dim_names:
     a.append(b)
 #print (a)
 
+
+######################
+######################
 
 
 #Write header in file
@@ -283,5 +294,9 @@ except:
 fo.close()
 
 
+######################
+######################
+
+
 #Final sweet msg
-print (var+"values successffuly extracted from "+sys.argv[1]+"!")
+print (var+" values successffuly extracted from "+sys.argv[1]+" !")
