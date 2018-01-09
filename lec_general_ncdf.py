@@ -1,8 +1,3 @@
-#a="b=f.variables['latitude'][:]"
-#exec(a)
-#b
-#ncdump -h dataset-ibi-reanalysis-bio-005-003-monthly-regulargrid_1510914389133.nc | sed -n  '/dimensions:/,/variables:/p
-
 from pylab import *
 import netCDF4
 from netCDF4 import Dataset
@@ -34,6 +29,8 @@ def haversine(lon1, lat1, lon2, lat2):
     r = 6371 # Radius of earth in kilometers. Use 3956 for miles
     return c * r
 
+
+#Comparison functions, return a list of indexes for the user conditions 
 def is_strict_inf(filename, dim_name, threshold):
     list_dim=[]
     for i in range(0,filename.variables[dim_name].size):
@@ -78,7 +75,7 @@ def is_equal(filename, dim_name, value):
     return index
 
 
-#recup fichier nc
+#Get Input file
 inputfile=Dataset(sys.argv[1])
 
 Coord_bool=False
@@ -86,49 +83,49 @@ Coord_bool=False
 #Check if coord is passed as parameter
 arg_n=len(sys.argv)-1
 if(((arg_n-3)%3)!=0):
-    #print "il y a des coord a prendre en compte. Reduction de arg_n de 4."
-    Coord_bool=True #Utile pour recup les coord les plus proche plus loins
-    arg_n=arg_n-4
+    Coord_bool=True #Useful to get closest coord
+    arg_n=arg_n-4 #Number of arg minus lat & lon
     name_dim_lat=str(sys.argv[-4])
     name_dim_lon=str(sys.argv[-2])
     value_dim_lat=float(sys.argv[-3])
     value_dim_lon=float(sys.argv[-1])
 
-#Recup coord user
+    #Get all lat & lon
     try:
         lat=np.ma.MaskedArray(inputfile.variables[name_dim_lat])
         lon=np.ma.MaskedArray(inputfile.variables[name_dim_lon])
     except:
         sys.exit("Latitude & Longitude not found") 
 
-#Recup all coord set available
+    #Set all lat-lon pair avaible in list_coord
     list_coord_dispo=[]
     for i in lat:
         for j in lon:
             list_coord_dispo.append(i);list_coord_dispo.append(j)
 
-
+    #Reshape
     all_coord=np.reshape(list_coord_dispo,(lat.size*lon.size,2))
     noval=True
 
 
-#recup le fichier var.tab
+#Get the file of variables and number of dims : var.tab
 var_file=open(sys.argv[2],"r") #read
 lines=var_file.readlines() #line
 dim_names=[]
-for line in lines:
+for line in lines: #for every lines
     words=line.split()
-    if (words[0]==sys.argv[3]): #Quand ligne correspondante a la var passee en entree
-        varndim=int(words[1])  #Nombre de dim pour la var
-        for dim in range(2,varndim*2+2,2): #Recup des dim names
+    if (words[0]==sys.argv[3]): #When line match user input var
+        varndim=int(words[1])  #Get number of dim for the var
+        for dim in range(2,varndim*2+2,2): #Get dim names
             dim_names.append(words[dim])
-            if Coord_bool:
-                if words[dim]==name_dim_lat: #Recup index de lat et lon dans la liste des dim 
-                    dim_lat_index=dim/2 #WARNING useles
+            #if Coord_bool: #Get lat and lon wanted by the user
+                #if words[dim]==name_dim_lat: #Recup index de lat et lon dans la liste des dim 
+                    #dim_lat_index=dim/2 #WARNING useles
                     #print dim_lat_index
-                if words[dim]==name_dim_lon:
-                    dim_lon_index=dim/2 #WARNING useles
+                #if words[dim]==name_dim_lon:
+                    #dim_lon_index=dim/2 #WARNING useles
                     #print dim_lon_index
+
         #print ("Variable choisie : "+sys.argv[3]+". Nombre de dimensions : "+str(varndim)+". Dimensions : "+str(dim_names))
         
 
@@ -201,27 +198,20 @@ if point_unique:
         i=0 
         #print vec2.size
         #print vec2
-        if vec2.size>1:
+        if vec2.size>1: #Si vec plus grand que une val on les verifies toutes
             while True and i<len(vec2):
-                try:
-                    float(vec2[i])
+                if vec2[i]!="nan": #Si on trouve pas de  NA c'est bon
                     break
-                except:
+                else: #Sinon on passe a la pos suivante
                     i=i+1
-        else:
-            if isinstance(vec2,(np.float32)):
-                i=vec2.size+1 
-                noval=False
-                #print vec2
+        else: #Si vec d'une taille de 1
+            if vec2[i]!="nan":
                 break
-        #print a
-        #print b
-        if i<vec2.size:
-            #print lat.tolist().index(a)
-            #print lon.tolist().index(b)
+            else:
+                i=i+1
+        if i<vec2.size: #There is at least 1 nonNA value
             noval=False
-            #print vec2
-        else:
+        else: #If only NA pop the closest coord and search in the second closest coord in the next loop.
             all_coord=np.delete(all_coord,cc_index,0)
 
 
