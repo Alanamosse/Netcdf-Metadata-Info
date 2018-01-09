@@ -32,7 +32,7 @@
         <param type="data" label="Tabular of dimensions" name="dim_tab" format="tabular"/>
         
         <conditional name="condi_coord">
-            <param name="coord" type="boolean" label="Search custom coordinates" truevalue="yes_cust_coord" checked="true" falsevalue="nope" help="The tool will search available values for the closest coordinates."/>
+            <param name="coord" type="boolean" label="Search values for custom coordinates" truevalue="yes_cust_coord" checked="true" falsevalue="nope" help="Use this option to get valid values at your custom coordinates. If only NA values are avaibles the tool will search for the next closest coordinate until valid values."/>
             <when value="yes_cust_coord">
                 <param name="lat_dim" type="select" label="Select latitude" >
                     <options from_dataset="dim_tab">
