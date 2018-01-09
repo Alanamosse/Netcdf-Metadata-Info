@@ -7,12 +7,16 @@ import sys
 import os
 from scipy import spatial
 from math import radians, cos, sin, asin, sqrt
+import itertools
  
 def checklist(dim_list, dim_name, filtre, threshold):
     if not dim_list:
         error="Error "+str(dim_name)+" has no value "+str(filtre)+" "+str(threshold)
         sys.exit(error)
 
+
+#Return dist in km between two coord
+#Thx to : https://stackoverflow.com/questions/4913349/haversine-formula-in-python-bearing-and-distance-between-two-gps-points
 def haversine(lon1, lat1, lon2, lat2):
     """
     Calculate the great circle distance between two points 
@@ -74,9 +78,15 @@ def is_equal(filename, dim_name, value):
         index=find_nearest(filename.variables[dim_name][:],value)
     return index
 
-
+#Get args
 #Get Input file
 inputfile=Dataset(sys.argv[1])
+var_file_tab=sys.argv[2]
+var=sys.argv[3] #User chosen by user
+
+
+
+
 
 Coord_bool=False
 
@@ -109,260 +119,169 @@ if(((arg_n-3)%3)!=0):
 
 
 #Get the file of variables and number of dims : var.tab
-var_file=open(sys.argv[2],"r") #read
+var_file=open(var_file_tab,"r") #read
 lines=var_file.readlines() #line
 dim_names=[]
 for line in lines: #for every lines
     words=line.split()
-    if (words[0]==sys.argv[3]): #When line match user input var
+    if (words[0]==var): #When line match user input var
         varndim=int(words[1])  #Get number of dim for the var
         for dim in range(2,varndim*2+2,2): #Get dim names
             dim_names.append(words[dim])
-            #if Coord_bool: #Get lat and lon wanted by the user
-                #if words[dim]==name_dim_lat: #Recup index de lat et lon dans la liste des dim 
-                    #dim_lat_index=dim/2 #WARNING useles
-                    #print dim_lat_index
-                #if words[dim]==name_dim_lon:
-                    #dim_lon_index=dim/2 #WARNING useles
-                    #print dim_lon_index
-
-        #print ("Variable choisie : "+sys.argv[3]+". Nombre de dimensions : "+str(varndim)+". Dimensions : "+str(dim_names))
+        #print ("Chosen var : "+sys.argv[3]+". Number of dimensions : "+str(varndim)+". Dimensions : "+str(dim_names)) #Standard msg
         
 
-#TODO WARNING USELES, decrementer la suite
-#A mettre en option ici
-point_unique=True
-zone_geo=False
+#Use a dictionary to save every lists of indexes
+my_dic={} ##d["string{0}".format(x)]
 
-if point_unique:
-    var=sys.argv[3]
-    my_dic={} ##d["string{0}".format(x)]
-    for i in range(4,arg_n,3):
-        #print("\nNom de la dim : "+sys.argv[i]+" action sur la dim : "+sys.argv[i+1]+" .Valeur de la dim choisie : "+sys.argv[i+2]+"\n")
-        my_dic["string{0}".format(i)]="list_index_dim"
-        my_dic_index="list_index_dim"+str(sys.argv[i])   #TODO Verif si il y a lon et lat
-        if (sys.argv[i+1]=="l"):
-            my_dic[my_dic_index]=is_strict_inf(inputfile, sys.argv[i], float(sys.argv[i+2]))
-        if (sys.argv[i+1]=="le"):
-            my_dic[my_dic_index]=is_equal_inf(inputfile, sys.argv[i], float(sys.argv[i+2]))
-        if (sys.argv[i+1]=="g"):
-            my_dic[my_dic_index]=is_strict_sup(inputfile, sys.argv[i], float(sys.argv[i+2]))
-        if (sys.argv[i+1]=="ge"):
-            my_dic[my_dic_index]=is_equal_sup(inputfile, sys.argv[i], float(sys.argv[i+2]))
-        if (sys.argv[i+1]=="e"):
-            my_dic[my_dic_index]=is_equal(inputfile, sys.argv[i], float(sys.argv[i+2]))
-        if (sys.argv[i+1]==":"):
-            my_dic[my_dic_index]=np.arange(inputfile.variables[sys.argv[i]].size)
+for i in range(4,arg_n,3):
+    #print("\nDimension name : "+sys.argv[i]+" action : "+sys.argv[i+1]+" .Value : "+sys.argv[i+2]+"\n") #Standard msg
+    my_dic["string{0}".format(i)]="list_index_dim"
+    my_dic_index="list_index_dim"+str(sys.argv[i])   #TODO Verif si il y a lon et lat
+
+    #Apply every user filter. Call function and return list of index wich validate condition for every dim.
+    if (sys.argv[i+1]=="l"): #<
+        my_dic[my_dic_index]=is_strict_inf(inputfile, sys.argv[i], float(sys.argv[i+2]))
+    if (sys.argv[i+1]=="le"): #<=
+        my_dic[my_dic_index]=is_equal_inf(inputfile, sys.argv[i], float(sys.argv[i+2]))
+    if (sys.argv[i+1]=="g"): #>
+        my_dic[my_dic_index]=is_strict_sup(inputfile, sys.argv[i], float(sys.argv[i+2]))
+    if (sys.argv[i+1]=="ge"): #>=
+        my_dic[my_dic_index]=is_equal_sup(inputfile, sys.argv[i], float(sys.argv[i+2]))
+    if (sys.argv[i+1]=="e"): #==
+        my_dic[my_dic_index]=is_equal(inputfile, sys.argv[i], float(sys.argv[i+2]))
+    if (sys.argv[i+1]==":"): #all
+        my_dic[my_dic_index]=np.arange(inputfile.variables[sys.argv[i]].size)
 
 
-    #Si on a des coord a retrouver
-    if Coord_bool: 
-     while noval:
-        #print (all_coord.size)
-        #Recherche coord dispo la plus proche
+#If precise coord given.
+if Coord_bool: 
+    while noval: #While no closest coord with valid values is found
+        #Return closest coord avaible
         tree=spatial.KDTree(all_coord)
         closest_coord=(tree.query([(value_dim_lat,value_dim_lon)]))
         cc_index=closest_coord[1]
 
-        a=float(all_coord[closest_coord[1]][0][0])
-        b=float(all_coord[closest_coord[1]][0][1])
+        closest_lat=float(all_coord[closest_coord[1]][0][0])
+        closest_lon=float(all_coord[closest_coord[1]][0][1])
 
-        #Recup des index dans dic
+        #Get coord index into dictionary
         my_dic_index="list_index_dim"+str(name_dim_lat)
-        my_dic[my_dic_index]=lat.tolist().index(a)
+        my_dic[my_dic_index]=lat.tolist().index(closest_lat)
 
         my_dic_index="list_index_dim"+str(name_dim_lon)
-        my_dic[my_dic_index]=lon.tolist().index(b)
+        my_dic[my_dic_index]=lon.tolist().index(closest_lon)
 
 
-        #Execution du string avec les dic pour recup des valeurs apres filtres
-        exec2="vec2=inputfile.variables['"+str(sys.argv[3])+"']["
+        #All dictionary are saved in the string exec2 which will be exec(). Value got are in vec2
+        exec2="vec2=inputfile.variables['"+var+"']["
         first=True
-        for i in dim_names: #Respect de l'ordre des dimensions
+        for i in dim_names: #Every dim are in the right order
             if not first:
                 exec2=exec2+","
-            dimension_indexes="my_dic[\"list_index_dim"+i+"\"]"
-            try:  #Si ca fonctionne pas on met tout ? c'est yolo mais evite erreur
+            dimension_indexes="my_dic[\"list_index_dim"+i+"\"]" #new dim, custom name dic
+            try:  #If some error appear every indexes are used for the selected dim #TODO Give some error message
                 exec(dimension_indexes)
             except:
                 dimension_indexes=":"
-            exec2=exec2+dimension_indexes
-            first=False
+            exec2=exec2+dimension_indexes #Concatenate dim
+            first=False #Not the first element now
         exec2=exec2+"]"
-        #print exec2 #Execution et recup dans vec2
-        exec(exec2)
-        #print vec2
+        #print exec2 #To check integrity of the string
+        exec(exec2) #Execution, value are in vec2.
+        #print vec2 #Get the value, standard output
 
 
-        #Check qu'il y au moins une donnee int de dispo
+        #Check integrity of vec2. We don't want  NA values
         i=0 
-        #print vec2.size
-        #print vec2
-        if vec2.size>1: #Si vec plus grand que une val on les verifies toutes
-            while True and i<len(vec2):
-                if vec2[i]!="nan": #Si on trouve pas de  NA c'est bon
+        #Check every value, if at least one non NA is found vec2 and the current closest coords are validated #TODO ça sert à rien de dif >1 et =1 NANA?
+        if vec2.size>1: #If vec size is greater than 1
+            while True and i<len(vec2): 
+                if vec2[i]!="nan": 
                     break
-                else: #Sinon on passe a la pos suivante
+                else: 
                     i=i+1
-        else: #Si vec d'une taille de 1
+        else: #If vec2 len is 1
             if vec2[i]!="nan":
                 break
             else:
                 i=i+1
         if i<vec2.size: #There is at least 1 nonNA value
             noval=False
-        else: #If only NA pop the closest coord and search in the second closest coord in the next loop.
+        else: #If only NA, pop the closest coord and search in the second closest coord in the next loop.
             all_coord=np.delete(all_coord,cc_index,0)
 
 
 #TODO check if i<len(vec2). si oui pop la coord de all_coord. Faire une fonction pour remplir my_dic_lat et _lon pour recup plus vite et plus proprement. faire un while dans un if Coord_bool pour trouver coord avec values
-    else:
-        #Execution du string avec les dic pour recup des valeurs apres filtres
-        exec2="vec2=inputfile.variables['"+str(sys.argv[3])+"']["
-        first=True
-        for i in dim_names: #Respect de l'ordre des dimensions
-            if not first:
-                exec2=exec2+","
-            dimension_indexes="my_dic[\"list_index_dim"+i+"\"]"
-            try:  #Si ca fonctionne pas on met tout ? c'est yolo mais evite erreur
-                exec(dimension_indexes)
-            except:
-                dimension_indexes=":"
-            exec2=exec2+dimension_indexes
-            first=False
-        exec2=exec2+"]"
-        #print exec2 #Execution et recup dans vec2
-        exec(exec2)
-   
-#can be skiped AND MUST BE
-    a=[]
-    for i in dim_names:
-        try: #If it doesn't work here its because my_dic= : so there is no size. Except will direcly take size of the dim.
-            size_dim=inputfile[i][my_dic['list_index_dim'+i]].size
+
+#Same as before, dictionary use in exec2. exec(exec2) give vec2 and the values wanted.
+else:
+    exec2="vec2=inputfile.variables['"+str(sys.argv[3])+"']["
+    first=True
+    for i in dim_names: #Respect order
+        if not first:
+            exec2=exec2+","
+        dimension_indexes="my_dic[\"list_index_dim"+i+"\"]"
+        try:  #Avoid error and exit
+            exec(dimension_indexes)
         except:
-            size_dim=inputfile[i].size 
-            my_dic['list_index_dim'+i]=range(size_dim)
-        print (i,size_dim)
-        b=[]
-        if size_dim>1:
-            for s in range(0,size_dim):
-                b.append(inputfile[i][my_dic['list_index_dim'+i][s]])
-                #print (i,inputfile[i][my_dic['list_index_dim'+i][s]])
-        else:
-            b.append(inputfile[i][my_dic['list_index_dim'+i]])
-            #print (i,inputfile[i][my_dic['list_index_dim'+i]])
-        a.append(b)
-    #print (a)
-    import itertools
-    fo=open("header",'w')
-    for combination in itertools.product(*a):
-        fo.write(str(combination)+"\t")
-    fo.write("\n")
-    fo.close()
-    #print exec2
-    #print (vec2)
-    #print vec2.shape
-
-#test itertools combination
-#    import itertools
- #   a=[]
-  #  for i in dim_names:
-   #     b=[]
-    #    to_exe="b.append((inputfile['"+i+"'][my_dic['list_index_dim"+i+"']]))"
-     #   exec(to_exe)
-#
- #       print (to_exe,b)
-  #      a.append(b)   
-   # print (a)
-    #print ("\n")   
-    #for combination in itertools.product(*a):
-    #    print (combination)
-
-
-    fo=open("sortie.tabular",'w')
-    try:
-        vec2.tofile(fo,sep="\t",format="%s")
-    except:
-        vec3=np.ma.filled(vec2,np.nan)
-        vec3.tofile(fo,sep="\t",format="%s")
-    fo.close()
-
-
-
-
-################################################################"""""" 
-if zone_geo:
-    #Coord
-    lat_min=float(sys.argv[2])
-    lat_max=float(sys.argv[3])
-    lon_min=float(sys.argv[4])
-    lon_max=float(sys.argv[5])
-    #Var eg phy, chl ...
-    var=sys.argv[6]
-    
-    lat2=[]
-    lon2=[]
-    
-    #Recup les ids des coords dispo dans l'interval fourni
-    for i in lat:
-        if (i>=lat_min and i<=lat_max):
-            lat2.append(lat.tolist().index(i))
-            
-    for i in lon:
-        if (i>=lon_min and i<=lon_max):
-            lon2.append(lon.tolist().index(i))
-    
-    phy=np.array(inputfile.variables[var][:,0,lat2,lon2])
-    #print phy.shape
-    phy=np.swapaxes(phy,0,2)
-    
-
-    #Impression dans fichiers
-    fout='saved_array'
-    fo=open(fout,'w')
-    phy.tofile(fo,sep="\t",format="%s")   
-    fo.close()
-
-
-    fout='coord_header'
-    os.remove(fout)
-    fo=open(fout,'a')
-    for i in range(0,len(lon2)):
-        for j in range(0,len(lat2)):
-            fo.write (str(lat[lat2[j]])+":"+str(lon[lon2[i]])+"\t")
-    fo.write("\n")
-    fo.close()
-
-
-
-#Manips a faire pour formater en tabular :
-
-#cat saved_array |  xargs -n145 > saved_array2    ##xargs -n[taille variable temps)
-
-#awk '               
-#{ 
-#    for (i=1; i<=NF; i++)  {
-#        a[NR,i] = $i
-#    }
-#}
-#NF>p { p = NF }
-#END {    
-#    for(j=1; j<=p; j++) {
-#        str=a[1,j]
-#        for(i=2; i<=NR; i++){
-#            str=str" "a[i,j];
-#        }
-#        print str
-#    }
-#}' saved_array2 >saved_array3
-
-#cat coord_header saved_array3 > super.tab
-#cat super.tab | tr ' ' '\t' > super.tab2 
-# mv super.tab2 super.tab  
-
-
-
-
-
+            dimension_indexes=":"
+        exec2=exec2+dimension_indexes
+        first=False
+    exec2=exec2+"]"
+    exec(exec2)
    
- 
+
+
+
+
+
+
+#This part create the header of every value. 
+#Values of every dim from the var is saved in a list : b[].
+#All the lists b are saved in the unique list a[]
+#All the combinations of the dim values inside a[] are the headers of the vec2 values 
+
+#can be skiped AND MUST BE
+a=[]
+for i in dim_names:
+    try: #If it doesn't work here its because my_dic= : so there is no size. Except will direcly take size of the dim.
+        size_dim=inputfile[i][my_dic['list_index_dim'+i]].size
+    except:
+        size_dim=inputfile[i].size 
+        my_dic['list_index_dim'+i]=range(size_dim)
+
+    #print (i,size_dim) #Standard msg
+    b=[]  #TODO ICI non plus pas besoin de dif selon la taille nan ?
+    if size_dim>1:
+        for s in range(0,size_dim):
+            b.append(inputfile[i][my_dic['list_index_dim'+i][s]])
+            #print (i,inputfile[i][my_dic['list_index_dim'+i][s]])
+    else:
+        b.append(inputfile[i][my_dic['list_index_dim'+i]])
+        #print (i,inputfile[i][my_dic['list_index_dim'+i]])
+    a.append(b)
+#print (a)
+
+
+
+#Write header in file
+fo=open("header",'w')
+for combination in itertools.product(*a):
+    fo.write(str(combination)+"\t")
+fo.write("\n")
+fo.close()
+
+
+#Write vec2 in a tabular formated file
+fo=open("sortie.tabular",'w')
+try:
+    vec2.tofile(fo,sep="\t",format="%s")
+except:
+    vec3=np.ma.filled(vec2,np.nan)
+    vec3.tofile(fo,sep="\t",format="%s")
+fo.close()
+
+
+#Final sweet msg
+print (var+"values successffuly extracted from "+sys.argv[1]+"!")
