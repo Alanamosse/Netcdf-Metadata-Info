@@ -124,25 +124,22 @@ for line in lines:
             dim_names.append(words[dim])
             if Coord_bool:
                 if words[dim]==name_dim_lat: #Recup index de lat et lon dans la liste des dim 
-                    dim_lat_index=dim/2
+                    dim_lat_index=dim/2 #WARNING useles
                     #print dim_lat_index
                 if words[dim]==name_dim_lon:
-                    dim_lon_index=dim/2
+                    dim_lon_index=dim/2 #WARNING useles
                     #print dim_lon_index
         #print ("Variable choisie : "+sys.argv[3]+". Nombre de dimensions : "+str(varndim)+". Dimensions : "+str(dim_names))
         
 
-
+#TODO WARNING USELES, decrementer la suite
 #A mettre en option ici
 point_unique=True
 zone_geo=False
 
 if point_unique:
     var=sys.argv[3]
-    #ndim=(arg_n-3)/3 
-    #print ("nombre de dim :"+str(ndim))
-    my_dic={} #lol #d["string{0}".format(x)]
-    #execu="vec=inputfile.variables['"+str(sys.argv[3])+"']["
+    my_dic={} ##d["string{0}".format(x)]
     for i in range(4,arg_n,3):
         #print("\nNom de la dim : "+sys.argv[i]+" action sur la dim : "+sys.argv[i+1]+" .Valeur de la dim choisie : "+sys.argv[i+2]+"\n")
         my_dic["string{0}".format(i)]="list_index_dim"
@@ -164,6 +161,7 @@ if point_unique:
     #Si on a des coord a retrouver
     if Coord_bool: 
      while noval:
+        #print (all_coord.size)
         #Recherche coord dispo la plus proche
         tree=spatial.KDTree(all_coord)
         closest_coord=(tree.query([(value_dim_lat,value_dim_lon)]))
@@ -205,9 +203,11 @@ if point_unique:
         #print vec2
         if vec2.size>1:
             while True and i<len(vec2):
-                if isinstance(vec2[i],(np.float32)):
+                try:
+                    float(vec2[i])
                     break
-                i=i+1
+                except:
+                    i=i+1
         else:
             if isinstance(vec2,(np.float32)):
                 i=vec2.size+1 
@@ -247,7 +247,11 @@ if point_unique:
 #can be skiped AND MUST BE
     a=[]
     for i in dim_names:
-        size_dim=inputfile[i][my_dic['list_index_dim'+i]].size
+        try: #If it doesn't work here its because my_dic= : so there is no size. Except will direcly take size of the dim.
+            size_dim=inputfile[i][my_dic['list_index_dim'+i]].size
+        except:
+            size_dim=inputfile[i].size 
+            my_dic['list_index_dim'+i]=range(size_dim)
         print (i,size_dim)
         b=[]
         if size_dim>1:
@@ -258,11 +262,13 @@ if point_unique:
             b.append(inputfile[i][my_dic['list_index_dim'+i]])
             #print (i,inputfile[i][my_dic['list_index_dim'+i]])
         a.append(b)
-    print (a)
+    #print (a)
     import itertools
+    fo=open("header",'w')
     for combination in itertools.product(*a):
-        print (combination)
-
+        fo.write(str(combination)+"\t")
+    fo.write("\n")
+    fo.close()
     #print exec2
     #print (vec2)
     #print vec2.shape

@@ -13,6 +13,10 @@
         #if $condi_coord.coord=='yes_cust_coord'
             $condi_coord.lat_dim $condi_coord.lat_val $condi_coord.lon_dim $condi_coord.lon_val
         #end if
+        &&
+        cat header | sed 's/array(\[//g' | sed 's/], dtype=float32)//g' > header_cleaned
+        &&
+        cat header_cleaned sortie.tabular > supersortie.tabular
     ]]></command>
     <inputs>
         <param type="data" name="input" label="netcdf file" format="netcdf"/>
@@ -66,7 +70,7 @@
 
     </inputs>        
     <outputs>
-        <data name="output" format="tabular" label="Values from ${input.name}" from_work_dir="sortie.tabular"/>
+        <data name="output" format="tabular" label="Values from ${input.name}" from_work_dir="supersortie.tabular"/>
     </outputs>
     <help><![CDATA[
 Ceci est completement experimental. #lol        

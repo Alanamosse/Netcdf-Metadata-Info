@@ -146,7 +146,7 @@ main(int argc, char *argv[])
        for(int id=0;id<ndims_in;id++){
            if(retval=(nc_inq_dim(ncid,var.dims[id],dim_name,&recs))){ERR(retval);}
            if(id<var.ndims){fprintf(var_file,"\t%s\t%lu",dim_name,recs);}
-           else{fprintf(var_file,"\tNA\tNA");}
+           else{fprintf(var_file,"\t \t ");}
        }
        fprintf(var_file,"\n");
    }
