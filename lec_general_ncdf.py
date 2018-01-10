@@ -250,6 +250,10 @@ else:
 #Values of every dim from the var is saved in a list : b[].
 #All the lists b are saved in the unique list a[]
 #All the combinations of the dim values inside a[] are the headers of the vec2 values 
+
+#Also write dim_name into a file to make clear header.
+fo=open("header_names",'w')
+
 a=[]
 for i in dim_names:
     try: #If it doesn't work here its because my_dic= : so there is no size. Except will direcly take size of the dim.
@@ -268,8 +272,10 @@ for i in dim_names:
     else:
         b.append(inputfile[i][my_dic['list_index_dim'+i]])
         #print (i,inputfile[i][my_dic['list_index_dim'+i]])
-    a.append(b)
-#print (a)
+    a.append(b) 
+    fo.write(i+"\t")
+fo.write(var+"\n")
+fo.close()
 
 
 ######################
