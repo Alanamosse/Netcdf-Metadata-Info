@@ -131,7 +131,7 @@ main(int argc, char *argv[])
 
    /* Open file */
    FILE * var_file;
-   var_file=fopen("var2.tabular","w");
+   var_file=fopen("variables.tabular","w");
 
    if(var_file==NULL){printf("Error!");exit(1);}
 
