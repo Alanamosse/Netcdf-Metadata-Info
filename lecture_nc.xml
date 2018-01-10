@@ -19,20 +19,20 @@
         cat header_cleaned sortie.tabular > supersortie.tabular
     ]]></command>
     <inputs>
-        <param type="data" name="input" label="netcdf file" format="netcdf"/>
-        <param type="data" label="Tabular of variables" name="var_tab" format="tabular"/>
+        <param type="data" name="input" label="Input netcdf file" format="netcdf"/>
+        <param type="data" label="Tabular of variables" name="var_tab" format="tabular" help="Select the tabular file which summarize the available variables and dimensions."/>
 
-        <param name="var" type="select" label="Chose your variable">
+        <param name="var" type="select" label="Chose the variable to extract">
             <options from_dataset="var_tab">
                 <column name="name" index="0"/>
                 <column name="value" index="0"/>
                 <column name="n_dim" index="1"/>
             </options>
         </param>
-        <param type="data" label="Tabular of dimensions" name="dim_tab" format="tabular"/>
+        <param type="data" label="Tabular of dimensions" name="dim_tab" format="tabular" help="Netcdf Info on data X (dimensions_myVariable)"/>
         
         <conditional name="condi_coord">
-            <param name="coord" type="boolean" label="Search values for custom coordinates" truevalue="yes_cust_coord" checked="true" falsevalue="nope" help="Use this option to get valid values at your custom coordinates. If only NA values are avaibles the tool will search for the next closest coordinate until valid values."/>
+            <param name="coord" type="boolean" label="Search values for custom coordinates" truevalue="yes_cust_coord" checked="true" falsevalue="nope" help="Use this option to get valid values at your custom coordinates. If only NA values are availables the tool will search for the next closest coordinate until valid values."/>
             <when value="yes_cust_coord">
                 <param name="lat_dim" type="select" label="Select latitude" >
                     <options from_dataset="dim_tab">
@@ -50,7 +50,7 @@
             <when value="nope"></when>
         </conditional>
         <repeat name="user_choice" title="Filter">
-            <param name="dim" type="select" label="Filter by dimensions" help="The dimension must be part of the variable">
+            <param name="dim" type="select" label="Dimensions">
                 <options from_dataset="dim_tab">
                     <column name="value" index="0"/>
                 </options>
@@ -73,6 +73,10 @@
         <data name="output" format="tabular" label="Values from ${input.name}" from_work_dir="supersortie.tabular"/>
     </outputs>
     <help><![CDATA[
-Ceci est completement experimental. #lol        
+The Netcdf Read tool can be used after the Netcdf Info. 
+
+Values for each variable can be extract with custom conditions on dimensions.
+
+Eg every valid values for Var1 at time T latitude 45 longitude -3.
     ]]></help>
 </tool>

@@ -5,6 +5,8 @@
         /media/linux-65mo/Linux/65MO/lecture_netcdf/aout $input
         &&
         bash /media/linux-65mo/Linux/65MO/lecture_netcdf/div_vartab.sh $var_tabs
+        &&
+        ncdump -h $input
     ]]></command>
     <inputs>
         <param type="data" name="input" label="netcdf file" format="netcdf"/>
