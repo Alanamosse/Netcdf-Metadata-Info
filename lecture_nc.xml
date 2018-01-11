@@ -82,6 +82,21 @@
     <outputs>
         <data name="output" format="tabular" label="Values from ${input.name}" from_work_dir="final.tabular"/>
     </outputs>
+    <tests>
+        <test>
+             <param name="input" value="dataset-ibi-reanalysis-bio-005-003-monthly-regulargrid_1510914389133.nc"/>
+             <param name="var_tab" value="var_tab_dataset-ibi"/>
+             <param name="var" value="phy"/>
+             <param name="dim_tab" value="tab_dim_phy_dataset-ibi"/>
+             <param name="condi_coord" value="yes_cut_coord"/>
+             <param name="lat_dim" value="latitude"/>
+             <param name="lat_val" value="44.0"/>
+             <param name="lon_dim" value="longitude"/>
+             <param name="lon_val" value="-2.0"/>
+             <param name="output" value="Test1.tabular"/>
+        </test>
+    </tests>
+
     <help><![CDATA[
 The Netcdf Read tool can be used after the Netcdf Info. 
 
