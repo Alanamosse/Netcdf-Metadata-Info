@@ -2,9 +2,9 @@
     <requirements>
     </requirements>
     <command detect_errors="exit_code"><![CDATA[
-        /media/linux-65mo/Linux/65MO/lecture_netcdf/aout $input
+        $__tool_directory__/NC_info.exe $input
         &&
-        bash /media/linux-65mo/Linux/65MO/lecture_netcdf/div_vartab.sh $var_tabs
+        bash $__tool_directory__/div_vartab.sh $var_tabs
         &&
         ncdump -h $input
     ]]></command>
