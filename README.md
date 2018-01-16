@@ -14,3 +14,4 @@ The xml lecture_nc allows to choose a variable to extract and to add filter on d
 The option "Search values for custom coordinates" use the scipy spatial function to get the closest coordinates with non-NA values.
 
 The output is a tabular with the variable and its dimensions values (eg : latitude, longitude, time...).
+Transpose.sh is some awk code to swap rows and columns.
