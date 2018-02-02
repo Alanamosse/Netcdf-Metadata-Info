@@ -1,5 +1,26 @@
-//Compil like
-//gcc NC_info.c -lnetcdf -o my_exe
+/*
+
+General code to read and return information about Netcdf file.
+
+Input : netcdf format file
+
+Output is a summary tabular file with the general structure :
+
+*****************************************************************************************
+*Variable1    Var1_Number_of_Dim    Dim1    Dim1_size    ...    DimN    DimN_size       *
+*VariableX    VarX_Number_of_Dim    DimX1    DimX1_size    ...    DimXN    DimXN_size   *
+*...                                                                                    *
+*****************************************************************************************
+
+
+Dependencie : Netcdf 4.5 library, see : https://www.unidata.ucar.edu/software/netcdf/
+
+General code can be compilated 	as follow : 
+  $ gcc NC_info.c -lnetcdf -o NCinfo
+
+Also available as conda package "netcdf_info", see https://github.com/Alanamosse/netcdf
+
+*/
 
 #include <stdio.h>
 #include <stdlib.h>
