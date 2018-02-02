@@ -1,2 +1,8 @@
+CC=gcc
+CFLAGS=-lnetcdf
+EXEC=nc_info
+
+all:$(EXEC)
+
 nc_info: NC_info.c
-	gcc NC_info.c -lnetcdf -std=c99 -o nc_info
+	$(CC) NC_info.c -o nc_info $(CFLAGS)
