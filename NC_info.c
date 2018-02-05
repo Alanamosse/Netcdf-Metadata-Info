@@ -13,7 +13,15 @@ Output is a summary tabular file with the general structure :
 *****************************************************************************************
 
 
-Dependencie : Netcdf 4.5 library, see : https://www.unidata.ucar.edu/software/netcdf/
+This script is designed as part of the Galaxy tool "Netcdf Info" to read and extract information from general netcdf file.
+    General repo : https://github.com/65MO/Galaxy-E/blob/master/tools/read_netcdf
+    Galaxy wrapper : https://github.com/65MO/Galaxy-E/blob/master/tools/read_netcdf/nc_info.xml
+
+The output tabular file is used in the galaxy tool "Netcdf Read" to extract filtered values from netcdf file.
+    https://github.com/65MO/Galaxy-E/tree/master/tools/read_netcdf/lecture_nc.xml
+
+Dependency : Netcdf 4.5 library
+    https://www.unidata.ucar.edu/software/netcdf/
 
 General code can be compilated 	as follow : 
   $ gcc NC_info.c -lnetcdf -o NCinfo
@@ -109,7 +117,7 @@ main(int argc, char *argv[])
     int ndimsp,nattsp;
 
     /* Open the file. */
-    if ((retval = nc_open(FILE_NAME, NC_NOWRITE, &ncid))){ERR(retval);}
+    if (retval = nc_open(FILE_NAME, NC_NOWRITE, &ncid)){ERR(retval);}
    
     /* File details */
     if (retval = nc_inq(ncid, &ndims_in, &nvars_in, &ngatts_in,&unlimdimid_in)){ERR(retval);}
@@ -157,6 +165,8 @@ main(int argc, char *argv[])
         }
         fprintf(var_file,"\n");
     }
+
+    if (retval = nc_close(ncid)){ERR(retval);}
 
 return 0;
 }
