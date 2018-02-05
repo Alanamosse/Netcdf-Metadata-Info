@@ -6,6 +6,12 @@ One input file needed, netcdf format (*.nc).
 
 Variables names, dimensions, and sizes are summarized in an output tabular file.
 
+## Galaxy usage
+
+This code is designed as part of the Galaxy tool "Netcdf Info"
+
+https://github.com/65MO/Galaxy-E/blob/master/tools/read_netcdf
+
 ## Output structure
 
 The variable.tabular output looks like :
