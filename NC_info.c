@@ -97,6 +97,11 @@ main(int argc, char *argv[])
     //Check parameter
     if(argc!=2){printf("One argument expected : Netcdf file path.\n");return 2;}
 
+    //Check input arg
+    //TODO Some nice help error
+    //printf("%s\n",argv[1]);
+    if( strcmp(argv[1],"-h")==0 || strcmp(argv[1],"--help")==0 ){printf("Help\n");exit(0);}
+
 
     #define FILE_NAME argv[1]
     int ncid;
