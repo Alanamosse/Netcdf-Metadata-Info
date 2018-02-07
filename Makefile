@@ -5,4 +5,4 @@ EXEC=nc_info
 all:$(EXEC)
 
 nc_info: NC_info.c
-	$(CC) NC_info.c -o nc_info $(CFLAGS)
+	$(CC) NC_info.c -o netcdf-metadata-info $(CFLAGS)
