@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-lnetcdf
-EXEC=nc_info
+EXEC=netcdf-metadata-info
 
 all:$(EXEC)
 
