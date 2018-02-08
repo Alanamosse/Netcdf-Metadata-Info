@@ -102,15 +102,18 @@ main(int argc, char *argv[])
     //printf("%s\n",argv[1]);
     if( strcmp(argv[1],"-h")==0 || strcmp(argv[1],"--help")==0 ){
         printf("\n**** Information on Netcdf metadata ****\n\n");
-printf("- The netcdf-metadata-info tool needs a netcdf input file. It will give informations about every variable and dimension and summarize it into an output tabular file named : variable.tabular.\n\n");
-printf("- The file has the general structure : \n\n");
-printf("******************************************************************************************\n");
-printf("* Variable1    Var1_Number_of_Dim    Dim1    Dim1_size    ...    DimN    DimN_size       *\n");
-printf("* VariableX    VarX_Number_of_Dim    DimX1   DimX1_size   ...    DimXN   DimXN_size      *\n");
-printf("* ...                                                                                    *\n");
-printf("******************************************************************************************\n\n\n");
-printf("- This tool is necessary to execute the Galaxy tool Netcdf read : URL.\n\n");
-printf("Code is written in C and use the unidata Netcdf source functions : URL2.\nFor more complete and human readable informations you can use the ncdump command line from Netcdf package.\n\n\n");exit(0);}
+        printf("- The netcdf-metadata-info tool needs a netcdf input file. It will give informations about every variable and dimension and summarize it into an output tabular file named : variable.tabular.\n\n");
+        printf("- The file has the general structure : \n\n");
+        printf("  ******************************************************************************************\n");
+        printf("  * Variable1    Var1_Number_of_Dim    Dim1    Dim1_size    ...    DimN    DimN_size       *\n");
+        printf("  * VariableX    VarX_Number_of_Dim    DimX1   DimX1_size   ...    DimXN   DimXN_size      *\n");
+        printf("  * ...                                                                                    *\n");
+        printf("  ******************************************************************************************\n\n\n");
+        printf("- This tool is necessary to execute the Galaxy tool Netcdf read : URL.\n\n");
+        printf("- Code is written in C and use the unidata Netcdf source functions : https://www.unidata.ucar.edu/software/netcdf/\n");
+        printf("- For more complete and human readable informations you can use the ncdump command line from Netcdf package.\n\n\n");
+
+        exit(0);}
 
 
     #define FILE_NAME argv[1]
