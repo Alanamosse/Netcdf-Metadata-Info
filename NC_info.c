@@ -109,7 +109,8 @@ main(int argc, char *argv[])
         printf("  * VariableX    VarX_Number_of_Dim    DimX1   DimX1_size   ...    DimXN   DimXN_size      *\n");
         printf("  * ...                                                                                    *\n");
         printf("  ******************************************************************************************\n\n\n");
-        printf("- This tool is necessary to execute the Galaxy tool Netcdf read : URL.\n\n");
+        printf("- This tool is necessary to execute the Galaxy tool Netcdf read.\n");
+        printf("\t-WARNING Dev Galaxy URL : http://openstack-192-168-100-22.genouest.org/\n\n");
         printf("- Code is written in C and use the unidata Netcdf source functions : https://www.unidata.ucar.edu/software/netcdf/\n");
         printf("- For more complete and human readable informations you can use the ncdump command line from Netcdf package.\n\n\n");
 
